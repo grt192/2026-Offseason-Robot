@@ -178,7 +178,4 @@ public class DriveMotor {
         return motor.getDeviceTemp().getValueAsDouble();
     }
 
-
-
-    
 }

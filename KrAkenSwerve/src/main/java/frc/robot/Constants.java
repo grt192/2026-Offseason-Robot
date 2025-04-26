@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
+
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,15 +18,15 @@ package frc.robot;
 public final class Constants {
   public static class SwerveConstants {
 
-    // Motor Constants
-    public static final double PEAK_CURRENT = 60; // Maximum current limit for the motor in amps 
-    public static final double RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle
+    // Motor Constants (DRIVE)
+    public static final double PEAK_CURRENT = 80; // Maximum current limit for the motor in amps, this number is in CTRE docs 
+    public static final double RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle NEED TO TUNE
 
-    // Physical Measurements
-    public static final double DRIVE_WHEEL_CIRCUMFERENCE = 0; // Circumference of the drive wheel 
-    public static final double DRIVE_GEAR_REDUCTION = 0; // Gear reduction ratio for the drive system 
+    // Physical Measurements (DRIVE)
+    public static final double DRIVE_WHEEL_CIRCUMFERENCE = Units.inchesToMeters(4 * Math.PI); // Circumference of the drive wheel in M
+    public static final double DRIVE_GEAR_REDUCTION = 180. / 26.; // Gear reduction ratio  for Drive
 
-    
+
     
   }
 }
