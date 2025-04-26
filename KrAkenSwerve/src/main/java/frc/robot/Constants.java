@@ -13,7 +13,17 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+  public static class SwerveConstants {
+
+    // Motor Constants
+    public static final double PEAK_CURRENT = 60; // Maximum current limit for the motor in amps 
+    public static final double RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle
+
+    // Physical Measurements
+    public static final double DRIVE_WHEEL_CIRCUMFERENCE = 0; // Circumference of the drive wheel 
+    public static final double DRIVE_GEAR_REDUCTION = 0; // Gear reduction ratio for the drive system 
+
+    
+    
   }
 }
