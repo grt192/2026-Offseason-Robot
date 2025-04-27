@@ -213,10 +213,10 @@ public class SteerMotor {
         else if (difference < -180) {difference += 360;}
 
         // Figure Out position to go To
-        double gaolTurn = currentDegrees + difference;
+        double goalTurn = currentDegrees + difference;
 
         // Converts from degrees to rotations
-        double desiredMotorRotations = degreesToMotorRotations(gaolTurn);
+        double desiredMotorRotations = degreesToMotorRotations(goalTurn);
 
         //Creates a reqest to go to that said position
         positionRequest.withPosition(desiredMotorRotations);
