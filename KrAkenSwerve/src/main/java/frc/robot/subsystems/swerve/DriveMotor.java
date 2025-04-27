@@ -2,18 +2,17 @@ package frc.robot.subsystems.swerve;
 
 //Constants Import 
 import static frc.robot.Constants.SwerveConstants.DRIVE_GEAR_REDUCTION;
+import static frc.robot.Constants.SwerveConstants.DRIVE_PEAK_CURRENT;
+import static frc.robot.Constants.SwerveConstants.DRIVE_RAMP_RATE;
 import static frc.robot.Constants.SwerveConstants.DRIVE_WHEEL_CIRCUMFERENCE;
-import static frc.robot.Constants.SwerveConstants.PEAK_CURRENT;
-import static frc.robot.Constants.SwerveConstants.RAMP_RATE;
 
-
-//CTRE imports
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
+//CTRE imports
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 
 
@@ -39,25 +38,35 @@ public class DriveMotor {
         motor = new TalonFX(motorID, "can");
         motor.setPosition(0);
 
+        // Configure CANcoder and Kraken
+        configureMotor();
+
+    }
+
+    /**
+     * Set Configurations for Kraken drive
+     */
+    public void configureMotor(){
+
         // Set peak current for torque limiting for stall prevention
-        motorConfig.TorqueCurrent.PeakForwardTorqueCurrent = PEAK_CURRENT;
-        motorConfig.TorqueCurrent.PeakReverseTorqueCurrent = - PEAK_CURRENT;
+        motorConfig.TorqueCurrent.PeakForwardTorqueCurrent = DRIVE_PEAK_CURRENT;
+        motorConfig.TorqueCurrent.PeakReverseTorqueCurrent = - DRIVE_PEAK_CURRENT;
 
         // How fast can the code change torque for the motor
-        motorConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = RAMP_RATE;
+        motorConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = DRIVE_RAMP_RATE;
 
         // By Default Robot will not move 
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        // Apply Configurations to Motor, in a loop due to high fail rate
-        while(true){
-            boolean error = motor.getConfigurator().apply(motorConfig, 0.1) == StatusCode.OK;
-            if (!error){
-                break;
-            } 
-        } 
-
+        // Apply motor config with retries (max 5 attempts)
+        for (int i = 0; i < 5; i++) {
+            if (motor.getConfigurator().apply(motorConfig, 0.1) == StatusCode.OK) {
+                break; // Success
+            }
+        }
     }
+
+
 
     /**
      * Sets Drive Motor Velocity in Meters/Seconds
@@ -69,7 +78,7 @@ public class DriveMotor {
         motor.setControl(torqueCurrentFOC.withVelocity(targetRotationsPerSec)); //apply this constant speed 
     }
 
-    /*
+    /**
      * Reset Encoder Position to 0, resets Distance
      */
     public void resetEncoder(){

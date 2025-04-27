@@ -19,14 +19,22 @@ public final class Constants {
   public static class SwerveConstants {
 
     // Motor Constants (DRIVE)
-    public static final double PEAK_CURRENT = 80; // Maximum current limit for the motor in amps, this number is in CTRE docs 
-    public static final double RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle NEED TO TUNE
+    public static final double DRIVE_PEAK_CURRENT = 80; // Maximum current limit for the motor in amps, this number is in CTRE docs 
+    public static final double DRIVE_RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle NEED TO TUNE
 
     // Physical Measurements (DRIVE)
     public static final double DRIVE_WHEEL_CIRCUMFERENCE = Units.inchesToMeters(4 * Math.PI); // Circumference of the drive wheel in Meters
     public static final double DRIVE_GEAR_REDUCTION = 180. / 26.; // Gear reduction ratio  for Drive
 
 
-    
+
+    // Motor Constants (STEER)
+    public static final double STEER_PEAK_CURRENT = 80; // Maximum current limit for the motor in amps, this number is in CTRE docs 
+    public static final double STEER_RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle NEED TO TUNE
+
+    // Physical Measurements (STEER)
+    public static final double STEER_GEAR_REDUCTION = 14.8; // Gear reduction ratio for steer
+
+
   }
 }
