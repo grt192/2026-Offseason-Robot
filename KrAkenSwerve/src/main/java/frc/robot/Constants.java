@@ -16,7 +16,7 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static class SwerveConstants {
+  public static class SwerveDriveConstants {
 
     // Motor Constants (DRIVE)
     public static final double DRIVE_PEAK_CURRENT = 80; // Maximum current limit for the motor in amps, this number is in CTRE docs 
@@ -27,14 +27,15 @@ public final class Constants {
     public static final double DRIVE_GEAR_REDUCTION = 180. / 26.; // Gear reduction ratio  for Drive
 
 
-
-    // Motor Constants (STEER)
-    public static final double STEER_PEAK_CURRENT = 80; // Maximum current limit for the motor in amps, this number is in CTRE docs 
-    public static final double STEER_RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle NEED TO TUNE
-
-    // Physical Measurements (STEER)
-    public static final double STEER_GEAR_REDUCTION = 14.8; // Gear reduction ratio for steer
-
+  }
+  public static class SwerveSteerConstants{
+      // Motor Constants (STEER)
+      public static final double STEER_PEAK_CURRENT = 80; // Maximum current limit for the motor in amps, this number is in CTRE docs 
+      public static final double STEER_RAMP_RATE = 0; // Time in seconds for the motor to go from neutral to full throttle NEED TO TUNE
+  
+      // Physical Measurements (STEER)
+      public static final double STEER_GEAR_REDUCTION = 14.8; // Gear reduction ratio for steer
+  
 
   }
 }

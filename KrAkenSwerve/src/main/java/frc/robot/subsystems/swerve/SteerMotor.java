@@ -1,10 +1,9 @@
 package frc.robot.subsystems.swerve;
 
 //Constants Import 
-import static frc.robot.Constants.SwerveConstants.STEER_GEAR_REDUCTION;
-import static frc.robot.Constants.SwerveConstants.STEER_PEAK_CURRENT;
-import static frc.robot.Constants.SwerveConstants.STEER_RAMP_RATE;
-
+import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
+import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
 
 //CTRE imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -15,9 +14,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
-
-
 
 public class SteerMotor {
 
@@ -35,6 +33,9 @@ public class SteerMotor {
 
     // For fine control of velocity and torque using FOC (Field-Oriented Control)
     private PositionTorqueCurrentFOC positionRequest = new PositionTorqueCurrentFOC(0).withSlot(0);
+
+    // For making positions wrap from 0-1 and resetting to not stack
+    private final ClosedLoopGeneralConfigs closedLoopGeneralConfigs = new ClosedLoopGeneralConfigs();
 
 
     public SteerMotor(int motorCAN, int encoderCAN) {
@@ -84,6 +85,10 @@ public class SteerMotor {
         // Encoder Being Applied
         motorConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID(); 
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder; 
+
+        // Enable position wrapping (by default values are from 0-1)
+        closedLoopGeneralConfigs.ContinuousWrap = true; //basicaly turns stacking off
+        motorConfig.ClosedLoopGeneral = closedLoopGeneralConfigs;
 
         // Apply motor config with retries (max 5 attempts)
         for (int i = 0; i < 5; i++) {
@@ -194,6 +199,24 @@ public class SteerMotor {
         return (degrees / 360.0) * STEER_GEAR_REDUCTION;
     }
 
+    public static double fasterTurnDirection(double current, double target) {
+
+        // Normalize the angles between 0 and 360
+        current = ((current % 360) + 360) % 360;
+        target = ((target % 360) + 360) % 360;
+
+        // Calculate clockwise and counterclockwise distances
+        double clockwise = (target - current + 360) % 360;
+        double counterClockwise = (current - target + 360) % 360;
+
+        // Determine the faster direction
+        if (clockwise <= counterClockwise) {
+            return clockwise;
+        } else {
+            return counterClockwise;
+        }
+    }
+
     /**
      * Using PID to move to target position
      * 
@@ -202,18 +225,13 @@ public class SteerMotor {
     public void setPosition(double targetRads) {
 
         // Convert RADS to Degree
-        double targetDegrees = (targetRads + Math.PI) / (2. * Math.PI);
+        double targetDegrees = (targetRads * 360) / (2. * Math.PI);
 
-        // Gets Current Position
-        double currentDegrees = getPosition();
-
-        // Finds If Left is Faster or Right is Faster
-        double difference = (targetDegrees - currentDegrees) % 360; 
-        if (difference > 180) {difference -= 360;} 
-        else if (difference < -180) {difference += 360;}
+        // Gets Current Position in *
+        double currentDegrees = getPosition() * 360.0; 
 
         // Figure Out position to go To
-        double goalTurn = currentDegrees + difference;
+        double goalTurn = fasterTurnDirection(currentDegrees, targetDegrees);
 
         // Converts from degrees to rotations
         double desiredMotorRotations = degreesToMotorRotations(goalTurn);
