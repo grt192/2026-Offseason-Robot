@@ -10,7 +10,7 @@ import static frc.robot.Constants.SwerveConstants.*;
 
 import java.util.EnumSet;
 
-public class SwerveModule {
+public class KrakenSwerveModule {
 
     private final DriveMotor driveMotor;
     private final SteerMotor steerMotor;
@@ -28,9 +28,9 @@ public class SwerveModule {
      * @param drivePort The CAN ID of the drive motor
      * @param steerPort The CAN ID of the steer motor
      * @param offsetRads The offset of the absolute encoder
+     * @param canCoderPort The CAN ID of the steer motor encoder
      */
-
-    public SwerveModule(int drivePort, int steerPort, double offsetRads, int canCoderPort) {
+    public KrakenSwerveModule(int drivePort, int steerPort, double offsetRads, int canCoderPort) {
 
         this.drivePort = drivePort;
         this.steerPort = steerPort;

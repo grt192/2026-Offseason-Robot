@@ -4,9 +4,15 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.swerve.KrackenSwerveModule;
+import frc.robot.subsystems.swerve.KrakenSwerveModule;
+import frc.robot.subsystems.swerve.SingleModuleSwerveSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -15,10 +21,25 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  CommandXboxController ps5Controller = new CommandXboxController(0); 
+
+  private final KrakenSwerveModule swerveModule = new KrakenSwerveModule(1, 2, 0.0, 3);// dont change to SwerveModule or it will use CTRE swerve
+  private SingleModuleSwerveSubsystem singleModuleSwerveSubsystem = new SingleModuleSwerveSubsystem(swerveModule);
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+
+    ps5Controller.leftBumper().onTrue(new InstantCommand(() -> {
+      singleModuleSwerveSubsystem.setState(0.1, Math.PI);
+    }));
+
+    ps5Controller.rightBumper().onTrue(new InstantCommand(() -> {
+      singleModuleSwerveSubsystem.setState(-0.1, 0);
+    }));
+
+  
+
     // Configure the trigger bindings
     configureBindings();
   }
