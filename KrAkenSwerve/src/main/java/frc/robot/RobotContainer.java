@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.swerve.KrackenSwerveModule;
+import frc.robot.subsystems.swerve.KrakenSwerveModule;
 import frc.robot.subsystems.swerve.KrakenSwerveModule;
 import frc.robot.subsystems.swerve.SingleModuleSwerveSubsystem;
 
