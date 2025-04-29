@@ -113,10 +113,9 @@ public class SteerMotor {
      * @param p :Determines how much the config will react to the error
      * @param i :Corrects recurring errors over time by stacking past errors
      * @param d :Reacting to the rate of change of the error, preventing overshooting and damping oscillations
-     * @param s :Helps with overcoming initial friction or resistance in systems
-     * @param v :Compensates for the velocity or speed at which the system is moving
+     * @param ff :
      */
-    public void configPID(double p, double i, double d, double s, double v) {
+    public void configPID(double p, double i, double d, double ff) {
 
         Slot0Configs slot0Configs = new Slot0Configs(); //used to store and update PID values
 
@@ -156,31 +155,18 @@ public class SteerMotor {
         slot0Configs.kD = d;
 
         /*
-         * Static is added to make sure the motor can spin properly even without presence of errors,
-         *      this includes things like power needed to overcome friction, drag, or the inertia
-         * 
-         * Imagine trying to turn a gear.
-         *      Even if you’re not trying to change its position, you still need to exert some force to overcome static friction — the resistance between the object and the surface, after doing so it will be more easy to turn
-         *          kS provides that initial extra force to overcome the friction and start turning the gear.
-         *          Once the gear starts moving, we will switch to using kP, kI, and kD terms.
-         * 
-         * kS helps with overcoming initial friction or resistance in systems
-         */
-        slot0Configs.kS = s;
-
-        /*
-         * Velocity compensates for the velocity or speed at which the system is moving, think if it like correction of speed
-         * 
-         * The kV term is proportional to the velocity or speed of the system, meaning that as the speed increases:
-         *       the control system will apply an appropriate amount of correction based on the speed at which the system is moving.
-         * 
-         * Imagine driving a car and trying to maintain a  speed. The kV term is like a cruise control system that adjusts the throttle based on how fast you’re going:
-         *      	If you’re going too fast, the kV term will reduce the throttle (power) to slow you down.
-		 *          If you’re going too slow, it will increase the throttle to speed up.
-         * 
-         * kV adjusts the system’s response based on its speed, helping to prevent overshooting and stabilize motion with goal of keeping constant speed.
-         */
-        slot0Configs.kV = v;
+        * Feedforward Control (kFF, or kV in Phoenix 6) predicts how much power we need based only on how fast we want to go,
+        *      instead of waiting for an error to happen first.
+        * 
+        * Imagine you’re driving a car on the highway. 
+        *      To stay at 60 mph, you don’t wait until you slow down to press the gas pedal — you give a little gas constantly.
+        * 
+        * kV is like setting a cruise control: it applies just enough output to maintain a certain speed or motion,
+        *      before any errors even occur.
+        * 
+        * Feedforward makes the motor control smoother, faster, and prevents the controller from working too hard correcting errors later.
+        */
+        slot0Configs.kV = ff;
 
         motor.getConfigurator().apply(slot0Configs);
     }
