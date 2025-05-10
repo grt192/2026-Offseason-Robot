@@ -6,7 +6,9 @@ import static frc.robot.Constants.SwerveDriveConstants.DRIVE_PEAK_CURRENT;
 import static frc.robot.Constants.SwerveDriveConstants.DRIVE_RAMP_RATE;
 import static frc.robot.Constants.SwerveDriveConstants.DRIVE_WHEEL_CIRCUMFERENCE;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
@@ -14,6 +16,19 @@ import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+
+//Logging imports
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.util.GRTUtil;
+import static frc.robot.Constants.LoggingConstants.SWERVE_TABLE;
 
 
 
@@ -32,6 +47,32 @@ public class DriveMotor {
     // Target speed in rotations per second
     private double targetRotationsPerSec = 0;
 
+
+    //logging
+    private NetworkTableInstance ntInstance;
+    private NetworkTable swerveStatsTable;
+    private DoublePublisher veloErrorPublisher;
+    private DoublePublisher veloPublisher;
+    private DoublePublisher appliedVlotsPublisher;
+    private DoublePublisher supplyCurrentPublisher;
+    private DoublePublisher torqueCurrentPublisher;
+    private DoublePublisher targetRPSPublisher;
+    private DoublePublisher positionPublisher;
+
+    private StatusSignal<Angle> positionSignal;
+    private StatusSignal<AngularVelocity> velocitySignal;
+    private StatusSignal<Voltage> appliedVoltsSignal;
+    private StatusSignal<Current> supplyCurrentSignal;
+    private StatusSignal<Current> torqueCurrentSignal; //torqueCurrent is Pro
+
+    private DoubleLogEntry positionLogEntry;
+    private DoubleLogEntry veloErrorLogEntry;
+    private DoubleLogEntry veloLogEntry;
+    private DoubleLogEntry targetVeloEntry;
+    private DoubleLogEntry appliedVoltsLogEntry;
+    private DoubleLogEntry supplyCurrLogEntry;
+    private DoubleLogEntry torqueCurrLogEntry;
+    private DoubleLogEntry temperatureLogEntry;
     public DriveMotor(int motorID){
 
         // Set Motor and reset Encoder
@@ -40,7 +81,57 @@ public class DriveMotor {
 
         // Configure CANcoder and Kraken
         configureMotor();
+        initNT(motorID);
+        initSignals();
+        initLogs(motorID);
+    }
 
+    /**
+     * initializes network table and entries
+     * @param canId motor's CAN ID
+     */
+    private void initNT(int canId){
+        ntInstance = NetworkTableInstance.getDefault();
+        swerveStatsTable = ntInstance.getTable(SWERVE_TABLE);
+        positionPublisher = swerveStatsTable.getDoubleTopic(canId + "position").publish();
+        targetRPSPublisher = swerveStatsTable.getDoubleTopic(canId + "targetRPS").publish();
+        veloErrorPublisher = swerveStatsTable.getDoubleTopic(canId + "veloError").publish();
+        veloPublisher = swerveStatsTable.getDoubleTopic(canId + "velo").publish();
+        appliedVlotsPublisher = swerveStatsTable.getDoubleTopic(canId + "appliedVolts").publish();
+        supplyCurrentPublisher = swerveStatsTable.getDoubleTopic(canId + "supplyCurrent").publish();
+        torqueCurrentPublisher = swerveStatsTable.getDoubleTopic(canId + "torqueCurrent").publish();
+    }
+
+    /**
+     * Initializes Phoenix 6's signals
+     */
+    private void initSignals(){
+        positionSignal = motor.getPosition();
+        velocitySignal = motor.getVelocity();
+        appliedVoltsSignal = motor.getMotorVoltage();
+        torqueCurrentSignal = motor.getTorqueCurrent();
+        supplyCurrentSignal = motor.getSupplyCurrent();
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+            250.0, positionSignal, velocitySignal,
+            appliedVoltsSignal, torqueCurrentSignal, supplyCurrentSignal
+        );
+        motor.optimizeBusUtilization(0, 1.0);
+    }
+
+    /**
+     * Initializes log entries
+     * @param canId drive motor's CAN ID
+     */
+    private void initLogs(int canId){
+        positionLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "position");
+        veloErrorLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "veloError"); 
+        veloLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "velo");
+        targetVeloEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "targetVelo");
+        appliedVoltsLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "appliedVolts");
+        supplyCurrLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "supplyCurrent");
+        torqueCurrLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "torqueCurrent");
+        temperatureLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "temperature");
     }
 
     /**
@@ -186,5 +277,7 @@ public class DriveMotor {
     public double getTemperature() {
         return motor.getDeviceTemp().getValueAsDouble();
     }
+
+    
 
 }
