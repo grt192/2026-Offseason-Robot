@@ -20,9 +20,11 @@ import frc.robot.subsystems.Vision.TimestampedVisionUpdate;
 import frc.robot.util.GRTUtil;
 
 import static frc.robot.Constants.SwerveConstants.*;
+import static frc.robot.Constants.DebugConstants.*;
 
 import static frc.robot.Constants.LoggingConstants.*;
 
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -32,7 +34,7 @@ import com.studica.frc.AHRS.NavXComType;
 
 public class SwerveSubsystem extends SubsystemBase {
 
-    private final SwerveModule frontLeftModule, frontRightModule, backLeftModule, backRightModule;
+    private final KrakenSwerveModule frontLeftModule, frontRightModule, backLeftModule, backRightModule;
     private SwerveModuleState[] states = {
         new SwerveModuleState(),
         new SwerveModuleState(),
@@ -68,10 +70,10 @@ public class SwerveSubsystem extends SubsystemBase {
         ahrs.reset();
         ahrs.zeroYaw();
 
-        frontLeftModule = new SwerveModule(FL_DRIVE, FL_STEER, FL_OFFSET);
-        frontRightModule = new SwerveModule(FR_DRIVE, FR_STEER, FR_OFFSET);
-        backLeftModule = new SwerveModule(BL_DRIVE, BL_STEER, BL_OFFSET);
-        backRightModule = new SwerveModule(BR_DRIVE, BR_STEER, BR_OFFSET);
+        frontLeftModule = new KrakenSwerveModule(FL_DRIVE, FL_STEER, FL_OFFSET, FL_ENCODER);
+        frontRightModule = new KrakenSwerveModule(FR_DRIVE, FR_STEER, FR_OFFSET, FR_ENCODER);
+        backLeftModule = new KrakenSwerveModule(BL_DRIVE, BL_STEER, BL_OFFSET, BL_ENCODER);
+        backRightModule = new KrakenSwerveModule(BR_DRIVE, BR_STEER, BR_OFFSET, BR_ENCODER);
 
         kinematics = new SwerveDriveKinematics(FL_POS, FR_POS, BL_POS, BR_POS);
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -132,8 +134,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
         //logging
         estimatedPoseLogEntry.append(estimatedPose, GRTUtil.getFPGATime()); 
-        publishStats();
-        logStats();
+        // publishStats();
+        // logStats();
     }
 
     /**
@@ -310,37 +312,37 @@ public class SwerveSubsystem extends SubsystemBase {
         ).publish();
     }
 
-    /**
-     * publishes swerve stats to NT
-     */
-    private void publishStats() {
-        estimatedPosePublisher.set(estimatedPose);
+    // /**
+    //  * publishes swerve stats to NT
+    //  */
+    // private void publishStats() {
+    //     estimatedPosePublisher.set(estimatedPose);
 
-        if(STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
-            swerveStatesPublisher.set(getModuleStates());
-        }
+    //     if(STATE_DEBUG || DRIVE_DEBUG || STEER_DEBUG) {
+    //         swerveStatesPublisher.set(getModuleStates());
+    //     }
 
-        if(DRIVE_DEBUG) {
-            frontLeftModule.publishDriveStats();
-            frontRightModule.publishDriveStats();
-            backLeftModule.publishDriveStats();
-            backRightModule.publishDriveStats();
-        }
+    //     if(DRIVE_DEBUG) {
+    //         frontLeftModule.publishDriveStats();
+    //         frontRightModule.publishDriveStats();
+    //         backLeftModule.publishDriveStats();
+    //         backRightModule.publishDriveStats();
+    //     }
 
-        if(STEER_DEBUG) {
-            frontLeftModule.publishSteerStats();
-            frontRightModule.publishSteerStats();
-            backLeftModule.publishSteerStats();
-            backRightModule.publishSteerStats();
-        }
-    }
+    //     if(STEER_DEBUG) {
+    //         frontLeftModule.publishSteerStats();
+    //         frontRightModule.publishSteerStats();
+    //         backLeftModule.publishSteerStats();
+    //         backRightModule.publishSteerStats();
+    //     }
+    // }
 
-    private void logStats() {
-        frontLeftModule.logStats();
-        frontRightModule.logStats();
-        backLeftModule.logStats();
-        backRightModule.logStats();
-    }
+    // private void logStats() {
+    //     frontLeftModule.logStats();
+    //     frontRightModule.logStats();
+    //     backLeftModule.logStats();
+    //     backRightModule.logStats();
+    // }
 
     /**
      * Enables drive debug

@@ -11,11 +11,22 @@ import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.util.datalog.DoubleLogEntry;
+import edu.wpi.first.wpilibj.DataLogManager;
+import frc.robot.util.GRTUtil;
+
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+
+//Logging and NT imports
+
 
 public class SteerMotor {
 
@@ -37,6 +48,18 @@ public class SteerMotor {
     // For making positions wrap from 0-1 and resetting to not stack
     private final ClosedLoopGeneralConfigs closedLoopGeneralConfigs = new ClosedLoopGeneralConfigs();
 
+    // For Logging
+    private DoubleLogEntry temperatureLogEntry;
+    private DoubleLogEntry motorPositionLogEntry;
+
+    // For NT
+    private NetworkTableInstance ntInstance;
+    private NetworkTable steerStatsTable;
+    private DoublePublisher motorPositionPublisher;
+    private DoublePublisher targetPositionPublisher;
+    private DoublePublisher motorTemperaturePublisher;
+
+
 
     public SteerMotor(int motorCAN, int encoderCAN) {
         // Set motor and encoder
@@ -47,6 +70,11 @@ public class SteerMotor {
         //configureCancoder(); no configs needed all can be done though phoenix Tunner
         configureMotor();
 
+        // Initialize NetworkTables
+        initNT(motorCAN);
+
+        // Initialize logs
+        initLogs(motorCAN);
 
     }
 
@@ -97,6 +125,33 @@ public class SteerMotor {
             }
         }
     }
+
+    private void initLogs(int canId) {
+        temperatureLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "motorTemperature");
+        motorPositionLogEntry = new DoubleLogEntry(DataLogManager.getLog(), canId + "motorPosition");
+    }
+
+    public void logStats() {
+        temperatureLogEntry.append(getTemperature(), GRTUtil.getFPGATime());
+        motorPositionLogEntry.append(getPosition(), GRTUtil.getFPGATime());
+    }
+
+    private void initNT(int canId) {
+        ntInstance = NetworkTableInstance.getDefault();
+        steerStatsTable = ntInstance.getTable("SwerveSteer");
+    
+        motorPositionPublisher = steerStatsTable.getDoubleTopic(canId + "motorPosition").publish();
+        targetPositionPublisher = steerStatsTable.getDoubleTopic(canId + "targetPosition").publish();
+        motorTemperaturePublisher = steerStatsTable.getDoubleTopic(canId + "motorTemperature").publish();
+    }
+
+    public void publishStats() {
+        motorPositionPublisher.set(getPosition());
+        targetPositionPublisher.set(degreesToMotorRotations(getPosition())); // Or use some relevant target position
+        motorTemperaturePublisher.set(getTemperature());
+    }
+    
+
 
 
     /**

@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import frc.robot.util.AlignUtil;
@@ -58,7 +59,49 @@ public final class Constants {
     public static final double[] STEER_I = new double[] {0, 0, 0, 0};
     public static final double[] STEER_D = new double[] {0, 0, 0, 0};
     public static final double[] STEER_FF = new double[] {0.023,.02,0.025,0.03}; 
+
+    // Front Left Module
+    public static final int    FL_DRIVE   = 0;
+    public static final int    FL_ENCODER = 1;
+    public static final int    FL_STEER   = 2;
+    public static final double FL_OFFSET  = 0;
+
+    // Front Right Module
+    public static final int    FR_DRIVE   = 3;
+    public static final int    FR_ENCODER = 4;
+    public static final int    FR_STEER   = 5;
+    public static final double FR_OFFSET  = 0;
+
+    // Back Left Module
+    public static final int    BL_DRIVE   = 6;
+    public static final int    BL_ENCODER = 7;
+    public static final int    BL_STEER   = 8;
+    public static final double BL_OFFSET  = 0;
+
+    // Back Right Module
+    public static final int    BR_DRIVE   = 9;
+    public static final int    BR_ENCODER = 10;
+    public static final int    BR_STEER   = 11;
+    public static final double BR_OFFSET  = 0;
+
+    // Module distance from center (in meters)
+    public static final double MODULE_X_DIST = Units.inchesToMeters(33 / 2.0);
+    public static final double MODULE_Y_DIST = Units.inchesToMeters(27 / 2.0);
+
+    // Module positions relative to robot center
+    public static final Translation2d FL_POS = new Translation2d( MODULE_X_DIST,  MODULE_Y_DIST);
+    public static final Translation2d FR_POS = new Translation2d( MODULE_X_DIST, -MODULE_Y_DIST);
+    public static final Translation2d BL_POS = new Translation2d(-MODULE_X_DIST,  MODULE_Y_DIST);
+    public static final Translation2d BR_POS = new Translation2d(-MODULE_X_DIST, -MODULE_Y_DIST);
+
+    public static final double MAX_VEL = 4800. / 6.923 / 60. * 2. * 2. * Math.PI * .0254; // Kraken speed / gear ratio / reduced to per second * circumference * convert to meters
+    public static final double MAX_OMEGA = MAX_VEL / FL_POS.getNorm();
+    
+
+
   }
+
+  
 
   public static class LoggingConstants{
     public static final String SWERVE_TABLE = "SwerveStats";
@@ -67,6 +110,9 @@ public final class Constants {
 
   public static class DebugConstants{
     public static final boolean MASTER_DEBUG = false;
+    public static final boolean DRIVE_DEBUG = false;
+    public static final boolean STEER_DEBUG = false;
+    public static final boolean STATE_DEBUG = false;
   }
 
   public static class AlignConstants{
