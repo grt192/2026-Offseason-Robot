@@ -61,27 +61,27 @@ public final class Constants {
     public static final double[] STEER_FF = new double[] {0.023,.02,0.025,0.03}; 
 
     // Front Left Module
-    public static final int    FL_DRIVE   = 0;
-    public static final int    FL_ENCODER = 1;
-    public static final int    FL_STEER   = 2;
+    public static final int    FL_DRIVE   = 0; //DONE
+    public static final int    FL_ENCODER = 1; 
+    public static final int    FL_STEER   = 7; //DONE
     public static final double FL_OFFSET  = 0;
 
     // Front Right Module
-    public static final int    FR_DRIVE   = 3;
-    public static final int    FR_ENCODER = 4;
-    public static final int    FR_STEER   = 5;
+    public static final int    FR_DRIVE   = 4; //DONE
+    public static final int    FR_ENCODER = 4; 
+    public static final int    FR_STEER   = 2; //DONE
     public static final double FR_OFFSET  = 0;
 
     // Back Left Module
-    public static final int    BL_DRIVE   = 6;
-    public static final int    BL_ENCODER = 7;
-    public static final int    BL_STEER   = 8;
+    public static final int    BL_DRIVE   = 5; //DONE
+    public static final int    BL_ENCODER = 9; 
+    public static final int    BL_STEER   = 1; //DONE 
     public static final double BL_OFFSET  = 0;
 
     // Back Right Module
-    public static final int    BR_DRIVE   = 9;
+    public static final int    BR_DRIVE   = 9; //DONE
     public static final int    BR_ENCODER = 10;
-    public static final int    BR_STEER   = 11;
+    public static final int    BR_STEER   = 3; //DONE
     public static final double BR_OFFSET  = 0;
 
     // Module distance from center (in meters)
