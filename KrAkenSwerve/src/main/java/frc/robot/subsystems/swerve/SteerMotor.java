@@ -5,12 +5,14 @@ import static frc.robot.Constants.SwerveSteerConstants.STEER_GEAR_REDUCTION;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_PEAK_CURRENT;
 import static frc.robot.Constants.SwerveSteerConstants.STEER_RAMP_RATE;
 
+
 //CTRE imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -67,7 +69,7 @@ public class SteerMotor {
         cancoder = new CANcoder(encoderCAN);
 
         // Configure CANcoder and Kraken
-        //configureCancoder(); no configs needed all can be done though phoenix Tunner
+        configureCancoder(); // called to ensure settings are applied programmatically
         configureMotor();
 
         // Initialize NetworkTables
@@ -87,6 +89,7 @@ public class SteerMotor {
          *      Inverse Direction
          *      Turn Range into -180 to 180
          */
+        cancoderconfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         // Apply config with retries (max 5 attempts)
         for (int i = 0; i < 5; i++) {
             if (cancoder.getConfigurator().apply(cancoderconfig, 0.1) == StatusCode.OK) {
@@ -107,12 +110,14 @@ public class SteerMotor {
         // How fast can the code change torque for the motor
         motorConfig.ClosedLoopRamps.TorqueClosedLoopRampPeriod = STEER_RAMP_RATE;
 
-        // By Default Robot will not move 
+        // By Default Robot will not move
+        motorConfig.MotorOutput.Inverted = com.ctre.phoenix6.signals.InvertedValue.CounterClockwise_Positive; // required if motor spins opposite 
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
         // Encoder Being Applied
         motorConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID(); 
-        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder; 
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+        motorConfig.Feedback.RotorToSensorRatio = STEER_GEAR_REDUCTION; // ensures sensor scaling matches gear reduction 
 
         // Enable position wrapping (by default values are from 0-1)
         closedLoopGeneralConfigs.ContinuousWrap = true; //basicaly turns stacking off
@@ -252,9 +257,9 @@ public class SteerMotor {
 
         // Determine the faster direction
         if (clockwise <= counterClockwise) {
-            return clockwise;
+            return clockwise; // turn clockwise
         } else {
-            return counterClockwise;
+            return -counterClockwise; // turn counterclockwise
         }
     }
 
@@ -275,7 +280,7 @@ public class SteerMotor {
         double goalTurn = fasterTurnDirection(currentDegrees, targetDegrees);
 
         // Converts from degrees to rotations
-        double desiredMotorRotations = degreesToMotorRotations(goalTurn);
+        double desiredMotorRotations = degreesToMotorRotations(currentDegrees + goalTurn);
 
         //Creates a reqest to go to that said position
         positionRequest.withPosition(desiredMotorRotations);
