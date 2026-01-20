@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Amps;
 import java.util.function.BooleanSupplier;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
