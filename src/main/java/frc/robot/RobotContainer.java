@@ -6,7 +6,7 @@ package frc.robot;
 
 // frc imports
 import frc.robot.controllers.PS5DriveController;
-
+import frc.robot.subsystems.climb.ClimbSubsystem;
 // Subsystems
 import frc.robot.subsystems.swerve.SwerveSubsystem;
 
@@ -38,6 +38,8 @@ public class RobotContainer {
   private PS5DriveController driveController;
   private CommandPS5Controller mechController;
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+
+  private ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem(canivore);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
