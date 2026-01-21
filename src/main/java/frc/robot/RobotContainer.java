@@ -99,6 +99,11 @@ public class RobotContainer {
           swerveSubsystem.resetDriverHeading();
         },
         swerveSubsystem);
+
+    var crossTrigger = mechController.cross();
+    var triangleTrigger = mechController.triangle();
+    crossTrigger.onTrue(m_ClimbSubsystem.climbDown(() -> crossTrigger.getAsBoolean()));
+    triangleTrigger.onTrue(m_ClimbSubsystem.climbUp(() -> triangleTrigger.getAsBoolean()));
   }
 
   /**
