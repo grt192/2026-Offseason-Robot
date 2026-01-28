@@ -17,15 +17,33 @@ public class ClimbSubsystem extends SubsystemBase {
         m_Winch = new Winch(canBusObj);
     }
 
+    private Command waitForButtonRelease(BooleanSupplier step) {
+        return Commands.waitUntil(() -> !step.getAsBoolean());
+    }
+
+    private Command waitForNextStep(BooleanSupplier step) {
+        return waitForButtonRelease(step)
+                .andThen(Commands.waitUntil(step))
+                .andThen(waitForButtonRelease(step));
+    }
+
     private Command initiateClimb(BooleanSupplier step) {
-        return m_Winch.pullUpClaw(step).andThen(Commands.waitUntil(step)).andThen(m_StabilizingArm.deployArm(step));
+        return waitForButtonRelease(step)
+                .andThen(m_Winch.pullUpClaw(step))
+                .andThen(waitForNextStep(step))
+                .andThen(m_StabilizingArm.deployArm(step));
     }
 
     public Command climbUp(BooleanSupplier step) {
-        return initiateClimb(step).andThen(Commands.waitUntil(step)).andThen(m_Winch.pullDownClaw(step));
+        return initiateClimb(step)
+                .andThen(waitForNextStep(step))
+                .andThen(m_Winch.pullDownClaw(step));
     }
 
     public Command climbDown(BooleanSupplier step) {
-        return m_Winch.pullUpClaw(step).andThen(Commands.waitUntil(step)).andThen(m_StabilizingArm.retractArm(step));
+        return waitForButtonRelease(step)
+                .andThen(m_Winch.pullUpClaw(step))
+                .andThen(waitForNextStep(step))
+                .andThen(m_StabilizingArm.retractArm(step));
     }
 }
